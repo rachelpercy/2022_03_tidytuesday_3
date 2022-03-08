@@ -1,6 +1,6 @@
 ---
 title: 'Tidy Tuesday #3'
-author: "Put your name here"
+author: "RACHEL PERCY"
 output: 
   html_document:
     df_print: paged
@@ -9,35 +9,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
 ```{r libraries}
 library(tidyverse)     # for graphing and data cleaning
 library(lubridate)     # for date manipulation
 library(ggthemes)      # for even more plotting themes
+library(openintro)
 theme_set(theme_minimal()) # My favorite ggplot() theme :)
 ```
-
-## Data choice 1: Freedom Data
-
-```{r}
-# Read in the data
-
-freedom <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-02-22/freedom.csv')
-
-# If the code above gives an error, uncomment the code below and use it instead. 
-# You will need to install the tidytuesdayR package first.
-
-# library(tidytuesdayR)
-# 
-# tuesdata <- tidytuesdayR::tt_load('2022-02-22')
-# tuesdata <- tidytuesdayR::tt_load(2022, week = 8)
-# 
-# freedom <- tuesdata$freedom
-```
-
-This week's data is about civil freedoms around the world. Read more about it, including definitions of variables, [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2022/2022-02-22/readme.md). 
 
 ## Data choice 2: Alternative fuel stations
 
@@ -47,23 +28,34 @@ This week's data is about civil freedoms around the world. Read more about it, i
 
 stations <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-03-01/stations.csv')
 
-# If the code above gives an error, uncomment the code below and use it instead. 
-# You will need to install the tidytuesdayR package first.
-
-# library(tidytuesdayR)
-# 
-# tuesdata <- tidytuesdayR::tt_load('2022-03-01')
-# tuesdata <- tidytuesdayR::tt_load(2022, week = 9)
-# 
-# stations <- tuesdata$stations
-
 ```
 
 Read more about the Alternative fuel stations data, including definitions of variables, [here](https://github.com/rfordatascience/tidytuesday/blob/master/data/2022/2022-03-01/readme.md). 
 
-## Instructions and tips
 
-ake a minute to plan out on paper or the white board what you want your plot to look like and then dive into the code. And make sure to read about what the variables are first! 
 
-When you are finished, please delete all the unneeded code and instructions and uncomment (delete the `#`) in the options section of code at the top. If you feel up for it, we encourage you to tweet out your graph with the `#TidyTuesday` hashtag and tag `@lisalendway` (Prof. Lisa) and `@Sintripetal` (Prof. Lauren). See the Tidy Tuesday description file if you want to use our `@MacTidyTuesday` Twitter account to do that. PLEASE take a moment to read the message at the top about alt text. If you want to post on Twitter, be sure to add that. If you need help, ask. Also, consider adding a caption or tag label with your name and source of the dataset. You can do this by adding something like: `labs(caption = "Plot created by YOURNAME, data from DATASOURCE")` to your plot code.
+```{r, fig.alt= "Choropleth Map of United States Showing Number of Alternative Charging Stations in Each State California has the most"}
+states_map <- map_data("state")
+
+stations %>% 
+  filter(CITY != "Ontario") %>% 
+  rename(region = STATE) %>% 
+  group_by(region) %>% 
+  summarise(state_n = n()) %>% 
+  mutate(state_name = str_to_lower(abbr2state(`region`))) %>% 
+  ggplot() +
+  geom_map(map = states_map,
+           aes(map_id = state_name,
+               fill = state_n)) +
+  scale_fill_viridis_c(option = "viridis") +
+  expand_limits(x = states_map$long, y = states_map$lat) +
+  theme_map() +
+  labs(title = "Number of Alternative Charging Stations in Each State",
+       fill = "Number of Stations",
+       caption = "Designed by Rachel Percy | March 8, 2022 \n Data from U.S. Department of Energy") +
+  theme(legend.background = element_blank())
+  
+
+```
+
 
